@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify, render_template, redirect, session
+from flask import Flask, request, jsonify, render_template, request, redirect, session
+
 import os
 import numpy as np
 import pandas as pd
 import pickle
 
-# Load datasets
+# load database
+
+
 sym_des = pd.read_csv("C:/Users/gaura/PycharmProjects/pythonProject/datasets/symtoms_df.csv")
 precautions = pd.read_csv("C:/Users/gaura/PycharmProjects/pythonProject/datasets/precautions_df.csv")
 workout = pd.read_csv("C:/Users/gaura/PycharmProjects/pythonProject/datasets/workout_df.csv")
@@ -12,18 +15,16 @@ description = pd.read_csv("C:/Users/gaura/PycharmProjects/pythonProject/datasets
 medications = pd.read_csv('C:/Users/gaura/PycharmProjects/pythonProject/datasets/medications.csv')
 diets = pd.read_csv("C:/Users/gaura/PycharmProjects/pythonProject/datasets/diets.csv")
 
-# Load model
+#load models
+
 svc = pickle.load(open('C:/Users/gaura/PycharmProjects/pythonProject/models/svc.pkl', 'rb'))
 
 app = Flask(__name__)
 
 
-@app.route('/')
-def hello():
-    return "Hello World!"
-
-
-# Helper function to get detailed information about the disease
+#============================================================
+# custome and helping functions
+#==========================helper funtions================
 def helper(dis):
     desc = description[description['Disease'] == dis]['Description']
     desc = " ".join([w for w in desc])
@@ -38,12 +39,10 @@ def helper(dis):
     die = [die for die in die.values]
 
     wrkout = workout[workout['disease'] == dis]['workout']
-    wrkout = " ".join([w for w in wrkout])
 
     return desc, pre, med, die, wrkout
 
 
-# Symptom and disease mappings
 symptoms_dict = {'itching': 0, 'skin_rash': 1, 'nodal_skin_eruptions': 2, 'continuous_sneezing': 3, 'shivering': 4,
                  'chills': 5, 'joint_pain': 6, 'stomach_pain': 7, 'acidity': 8, 'ulcers_on_tongue': 9,
                  'muscle_wasting': 10, 'vomiting': 11, 'burning_micturition': 12, 'spotting_ urination': 13,
@@ -100,32 +99,38 @@ def get_predicted_value(patient_symptoms):
 app.secret_key = os.urandom(24)
 
 
+# main python
+
+
 @app.route('/predict', methods=['POST', 'GET'])
-def predict():
+def predict(model=None):
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
-        if not symptoms:
-            return jsonify({'error': 'No symptoms provided'}), 400
-
         print("Symptoms from form data:", symptoms)  # For debugging
-        user_symptoms = [s.strip("[]' ") for s in symptoms.split(',')]
+        user_symptoms = [s.strip() for s in symptoms.split(',')]
+        # Remove any extra characters, if any
+        user_symptoms = [symptom.strip("[]' ") for symptom in user_symptoms]
         predicted_disease = get_predicted_value(user_symptoms)
         print("Predicted Disease:", predicted_disease)  # For debugging
         desc, pre, med, die, wrkout = helper(predicted_disease)
 
-        # Create the response dictionary
-        response = {
-            'Predicted Disease': str(predicted_disease),
-            'Description': str(desc),
-            'Precautions': pre,
-            'Medications': med,
-            'Workout': str(wrkout),
-            'Diet': str(die)
-        }
+        input_query = np.array([symptoms])
+        result = model.predict(input_query)[0]
 
-        return jsonify(response)
 
-    return jsonify({'error': 'Invalid request method, please use POST'}), 405
+        my_pre = []
+        for i in pre[0]:
+            my_pre.append(i)
+
+            # Assuming medications_list contains the medications data in the format ['Medication1', 'Medication2', ...]
+
+            # Preprocess the medications_list to remove brackets, commas, and single quotes
+
+
+
+
+        return jsonify({'popopo':str(result)},{'Predicted Disease': str(predicted_disease)}, {'Description': str(desc)}, {'Precautions': str(pre)},{'Medications': str(med)},
+                       {'Workout': str(wrkout)}, {'Diet': str(die)})
 
 
 if __name__ == "__main__":
