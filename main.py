@@ -114,8 +114,9 @@ def predict(model=None):
         print("Predicted Disease:", predicted_disease)  # For debugging
         desc, pre, med, die, wrkout = helper(predicted_disease)
 
-        input_query = np.array([symptoms])
-        result = model.predict(input_query)[0]
+        #input_query = np.array([symptoms])
+        #result = model.predict(input_query)[0]
+       # {'popopo': str(result)},
 
 
         my_pre = []
@@ -129,7 +130,7 @@ def predict(model=None):
 
 
 
-        return jsonify({'popopo':str(result)},{'Predicted Disease': str(predicted_disease)}, {'Description': str(desc)}, {'Precautions': str(pre)},{'Medications': str(med)},
+        return jsonify({'Predicted Disease': str(predicted_disease)}, {'Description': str(desc)}, {'Precautions': str(pre)},{'Medications': str(med)},
                        {'Workout': str(wrkout)}, {'Diet': str(die)})
 
 
