@@ -22,6 +22,11 @@ svc = pickle.load(open('C:/Users/gaura/PycharmProjects/pythonProject/models/svc.
 app = Flask(__name__)
 
 
+@app.route('/')
+def hello():
+    return "Hello World!"
+
+
 #============================================================
 # custome and helping functions
 #==========================helper funtions================
