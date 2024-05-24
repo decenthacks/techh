@@ -22,11 +22,6 @@ svc = pickle.load(open('C:/Users/gaura/PycharmProjects/pythonProject/models/svc.
 app = Flask(__name__)
 
 
-@app.route('/')
-def hello():
-    return "Hello World!"
-
-
 #============================================================
 # custome and helping functions
 #==========================helper funtions================
@@ -107,24 +102,30 @@ app.secret_key = os.urandom(24)
 # main python
 
 
-@app.route('/predict', methods=['POST','GET'])
+@app.route('/predict', methods=['POST', 'GET'])
 def predict():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
         user_symptoms = [s.strip() for s in symptoms.split(',')]
         user_symptoms = [symptom.strip("[]' ") for symptom in user_symptoms]
-        predicted_disease = get_predicted_value(user_symptoms)
-        desc, pre, med, die, wrkout = helper(predicted_disease)
 
-        response = {
-            'Predicted Disease': str(predicted_disease),
-            'Description': str(desc),
-            'Precautions': pre[0] if pre else [],
-            'Medications': med,
-            'Workout': str(wrkout),
-            'Diet': die
-        }
-        return jsonify(response)
+        try:
+            predicted_disease = get_predicted_value(user_symptoms)
+            desc, pre, med, die, wrkout = helper(predicted_disease)
+
+            return jsonify({
+                'Predicted Disease': str(predicted_disease),
+                'Description': str(desc),
+                'Precautions': str(pre),
+                'Medications': str(med),
+                'Workout': str(wrkout),
+                'Diet': str(die)
+            })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'Method not allowed'}), 405
+
 
 if __name__ == "__main__":
     app.run(debug=True)
