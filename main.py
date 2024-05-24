@@ -107,8 +107,8 @@ app.secret_key = os.urandom(24)
 # main python
 
 
-@app.route('/predict', methods=['POST'])
-def predict(model=None):
+@app.route('/predict', methods=['POST','GET'])
+def predict():
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
         user_symptoms = [s.strip() for s in symptoms.split(',')]
