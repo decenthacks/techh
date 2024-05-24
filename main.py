@@ -102,37 +102,24 @@ app.secret_key = os.urandom(24)
 # main python
 
 
-@app.route('/predict', methods=['POST', 'GET'])
+@app.route('/predict', methods=['POST'])
 def predict(model=None):
     if request.method == 'POST':
         symptoms = request.form.get('symptoms')
-        print("Symptoms from form data:", symptoms)  # For debugging
         user_symptoms = [s.strip() for s in symptoms.split(',')]
-        # Remove any extra characters, if any
         user_symptoms = [symptom.strip("[]' ") for symptom in user_symptoms]
         predicted_disease = get_predicted_value(user_symptoms)
-        print("Predicted Disease:", predicted_disease)  # For debugging
         desc, pre, med, die, wrkout = helper(predicted_disease)
 
-        #input_query = np.array([symptoms])
-        #result = model.predict(input_query)[0]
-       # {'popopo': str(result)},
-
-
-        my_pre = []
-        for i in pre[0]:
-            my_pre.append(i)
-
-            # Assuming medications_list contains the medications data in the format ['Medication1', 'Medication2', ...]
-
-            # Preprocess the medications_list to remove brackets, commas, and single quotes
-
-
-
-
-        return jsonify({'Predicted Disease': str(predicted_disease)}, {'Description': str(desc)}, {'Precautions': str(pre)},{'Medications': str(med)},
-                       {'Workout': str(wrkout)}, {'Diet': str(die)})
-
+        response = {
+            'Predicted Disease': str(predicted_disease),
+            'Description': str(desc),
+            'Precautions': pre[0] if pre else [],
+            'Medications': med,
+            'Workout': str(wrkout),
+            'Diet': die
+        }
+        return jsonify(response)
 
 if __name__ == "__main__":
     app.run(debug=True)
